@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Bulgaria map</title>
+    <script type="text/javascript" src="js/d3.js"></script>
+    <style type="text/css">
+        /* No style rules here yet */
+
+        .municipality {
+            opacity:0;
+            visibility: hidden;
+            transition: opacity .3s ease-out;
+        }
+
+        .municipality.show {
+            opacity:1;
+            visibility:visible;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map-container" style="background:rgba(239,235,222,.85); width:900px;">
+    </div>
+    <script type="text/javascript">
+        var width = 900;
+        var height = 600;
+
+        var data = [
+            {
+                "municipality": "Аксаково",
+                "data": 12,
+                "info": "Lorem ipsum",
+                "nuts4": ""
+            },
+            {
+                "municipality": "Антоново",
+                "data": 121,
+                "info": "Lorem ipsum",
+                "nuts4": ""
+            },
+            {
+                "municipality": "Аврен",
+                "data": 22,
+                "info": "Lorem ipsum",
+                "nuts4": ""
+            },
+            {
+                "municipality": "Банско",
+                "data": 52,
+                "info": "Lorem ipsum",
+                "nuts4": ""
+            },
+            {
+                "municipality": "Созопол",
+                "data": 18,
+                "info": "Lorem ipsum",
+                "nuts4": ""
+            },
+            {
+                "municipality": "Царево",
+                "data": 12,
+                "info": "Lorem ipsum",
+                "nuts4": ""
+            },
+        ];
+
+        var vis = d3.select("#map-container").append("svg")
+            .attr("width", width).attr("height", height).attr('viewBox', '36 0 900 600');
+
+        d3.json("geojson/provinces.json", function(json) {
+            // create a first guess for the projection
+            var center = d3.geo.centroid(json)
+            var scale = 120;
+            var offset = [width / 2, height / 2];
+            var projection = d3.geo.mercator().scale(scale).center(
+                    center)
+                .translate(offset);
+
+            // create the path
+            var path = d3.geo.path().projection(projection);
+
+            // using the path determine the bounds of the current map and use 
+            //  these to determine better values for the scale and translation
+            var bounds = path.bounds(json);
+            var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
+            var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
+            var scale = (hscale < vscale) ? hscale : vscale;
+            var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
+                height - (bounds[0][1] + bounds[1][1]) / 2
+            ];
+
+            // new projection
+            projection = d3.geo.mercator().center(center)
+                .scale(scale).translate(offset);
+            path = path.projection(projection);
+
+            vis.selectAll("path")
+                .data(json.features).enter()
+                .append('g')
+                .attr('id', function(d){ 
+                    return d.properties.nuts3; 
+                })
+                .on('click', function(d) {
+                    d3.selectAll('.municipality.show')
+                        .classed('show', false)
+                    
+                    d3.selectAll('.nuts-' + d.properties.nuts3)
+                        .attr('class', 'municipality show nuts-' + d.properties.nuts3);
+                })
+                .attr('class', 'province')
+                .append(
+                    "path")
+                .attr("d", path)
+                .style("stroke-width", "1")
+                .style("stroke", "#7c9944")
+                .attr('fill', 'rgba(255,255,255,.45)');
+
+            data.forEach(function(d) {
+                d3.select('#' + d.county + '> path').attr('fill', '#7c9944'); 
+            });
+        });
+
+
+         d3.json("geojson/municipalities.json", function(json) {
+            // create a first guess for the projection
+            var center = d3.geo.centroid(json)
+            var scale = 120;
+            var offset = [width / 2, height / 2];
+            var projection = d3.geo.mercator().scale(scale).center(
+                    center)
+                .translate(offset);
+
+            // create the path
+            var path = d3.geo.path().projection(projection);
+
+            // using the path determine the bounds of the current map and use 
+            //  these to determine better values for the scale and translation
+            var bounds = path.bounds(json);
+            var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
+            var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
+            var scale = (hscale < vscale) ? hscale : vscale;
+            var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
+                height - (bounds[0][1] + bounds[1][1]) / 2
+            ];
+
+            // new projection
+            projection = d3.geo.mercator().center(center)
+                .scale(scale).translate(offset);
+            path = path.projection(projection);
+
+            vis.selectAll("path").data(json.features).enter()
+                .append('g')
+                .attr('id', function(d){
+                    return d.properties.nut4; 
+                })
+                .attr('class', function(d) {
+                    return 'municipality nuts-' + d.properties.nuts3; 
+                })
+                .append(
+                    "path")
+                .attr("d", path)
+                .style("stroke-width", "1")
+                .style("stroke", "#7c9944")
+                .attr('fill', 'rgba(255,255,255,.45)');
+
+            data.forEach(function(d) {
+                d3.select('#' + d.county + '> path').attr('fill', '#7c9944'); 
+            });
+        });
+    </script>
+</body>
+
+</html>
