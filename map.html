@@ -27,23 +27,51 @@
     <script type="text/javascript">
         var width = 900;
         var height = 600;
-        var center = null;
-        var projection = null;
+        var centered = null;
+        var path = null;
+        var g = null;
+
+        function region_clicked(d) {
+            var x, y, k;
+            console.log(d);
+            if (d && centered !== d) {
+                var centroid = path.centroid(d);
+                x = centroid[0];
+                y = centroid[1];
+                k = 4;
+                centered = d;
+            } else {
+                x = width / 2;
+                y = height / 2;
+                k = 1;
+                centered = null;
+            }
+
+            g.selectAll("path")
+                .classed("active", centered && function(d) { return d === centered; });
+
+            g.transition()
+                .duration(750)
+                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+                .style("stroke-width", 1.5 / k + "px");
+        } 
 
         var vis = d3.select("#map-container").append("svg")
             .attr("width", width).attr("height", height).attr('viewBox', '36 0 900 600');
+
+        g = vis.append('g');
 
         d3.json("geojson/provinces.json", function(json) {
             // create a first guess for the projection
             center = d3.geo.centroid(json)
             var scale = 120;
             var offset = [width / 2, height / 2];
-            projection = d3.geo.mercator().scale(scale).center(
+            var projection = d3.geo.mercator().scale(scale).center(
                     center)
                 .translate(offset);
 
             // create the path
-            var path = d3.geo.path().projection(projection);
+            path = d3.geo.path().projection(projection);
 
             // using the path determine the bounds of the current map and use 
             //  these to determine better values for the scale and translation
@@ -72,6 +100,8 @@
                     
                     d3.selectAll('.nuts-' + d.properties.nuts3)
                         .attr('class', 'municipality show nuts-' + d.properties.nuts3);
+
+                    region_clicked(d3.select('#' + d.properties.nuts3 + ' > path'));
                 })
                 .attr('class', 'province')
                 .append(
@@ -101,7 +131,6 @@
                         .attr("transform", function() {
                             var x = parseFloat(geo[0]);
                             var y = parseFloat(geo[1]);
-                            console.log(x,y);
                             return "translate(" + projection([x,y]) + ")";
                         }); 
                 });
