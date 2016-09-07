@@ -33,28 +33,32 @@
 
         function region_clicked(d) {
             var x, y, k;
-            console.log(d);
             if (d && centered !== d) {
                 var centroid = path.centroid(d);
+                console.log(centroid);
                 x = centroid[0];
                 y = centroid[1];
-                k = 4;
+                k = 2.5;
                 centered = d;
             } else {
                 x = width / 2;
                 y = height / 2;
                 k = 1;
                 centered = null;
-            }
 
-            g.selectAll("path")
-                .classed("active", centered && function(d) { return d === centered; });
+                zoom_out();
+            }
 
             g.transition()
                 .duration(750)
                 .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
                 .style("stroke-width", 1.5 / k + "px");
         } 
+
+        function zoom_out() {
+            d3.selectAll('.municipality.show')
+                        .classed('show', false);
+        }
 
         var vis = d3.select("#map-container").append("svg")
             .attr("width", width).attr("height", height).attr('viewBox', '36 0 900 600');
@@ -88,7 +92,7 @@
                 .scale(scale).translate(offset);
             path = path.projection(projection);
 
-            vis.selectAll("path")
+            g.selectAll("path")
                 .data(json.features).enter()
                 .append('g')
                 .attr('id', function(d){ 
@@ -96,12 +100,12 @@
                 })
                 .on('click', function(d) {
                     d3.selectAll('.municipality.show')
-                        .classed('show', false)
+                        .classed('show', false);
                     
                     d3.selectAll('.nuts-' + d.properties.nuts3)
                         .attr('class', 'municipality show nuts-' + d.properties.nuts3);
 
-                    region_clicked(d3.select('#' + d.properties.nuts3 + ' > path'));
+                    region_clicked(d); //d3.select('#' + d.properties.nuts3 + ' > path'));
                 })
                 .attr('class', 'province')
                 .append(
@@ -115,7 +119,7 @@
             d3.json("geojson/places.json", function(json) {
                 json.forEach(function(place) {
                     var geo = place.geo.split(',');
-                    var placeGroup = vis.append('g')
+                    var placeGroup = g.append('g')
                     placeGroup.attr('id', place.municipality_code);    
                     placeGroup
                         .append('circle')
@@ -165,7 +169,7 @@
                 .scale(scale).translate(offset);
             path = path.projection(projection);
 
-            vis.selectAll("path").data(json.features).enter()
+            g.selectAll("path").data(json.features).enter()
                 .append('g')
                 .attr('id', function(d){
                     return d.properties.nut4; 
