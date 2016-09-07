@@ -135,26 +135,16 @@
     }
 
     function load_places() {
-        d3.json("geojson/places.json?1", function(json) {
+        d3.json("geojson/places.json", function(json) {
             json.forEach(function(place) {
                 var geo = place.geo.split(',');
-                var placeGroup = g.append('g');
-                console.log(place);
+                var placeGroup = g.append('g')
                 placeGroup.attr('id', place.municipality_code);    
                 placeGroup
                     .append('circle')
                     .attr("r",5)
                     .attr("transform", function() {
                         return "translate(" + projection([parseFloat(geo[0]), parseFloat(geo[1])]) + ")";
-                    })
-                    .attr("class", function(d) {
-                        if(place.village === 0) {
-                            return 'town';
-                        }
-
-                        if(place.village === 1) {
-                            return 'village';
-                        }
                     }); 
                 placeGroup
                     .append('text')
@@ -165,15 +155,6 @@
                         var x = parseFloat(geo[0]);
                         var y = parseFloat(geo[1]);
                         return "translate(" + projection([x,y]) + ")";
-                    })
-                    .attr("class", function(d) {
-                        if(place.village === 0) {
-                            return 'town';
-                        }
-
-                        if(place.village === 1) {
-                            return 'village';
-                        }
                     }); 
             });
         });
