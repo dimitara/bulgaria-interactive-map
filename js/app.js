@@ -4,12 +4,12 @@
     var centered = null;
     var path = null;
     var g = null;
+    var projection = null;
 
     function region_clicked(d) {
         var x, y, k;
         if (d && centered !== d) {
             var centroid = path.centroid(d);
-            console.log(centroid);
             x = centroid[0];
             y = centroid[1];
             k = 2.5;
@@ -34,62 +34,107 @@
                     .classed('show', false);
     }
 
-    var vis = d3.select("#map-container").append("svg")
-        .attr("width", width).attr("height", height).attr('viewBox', '36 0 900 600');
+    function load_provinces() {
+        d3.json("geojson/provinces.json", function(json) {
+            // create a first guess for the projection
+            center = d3.geo.centroid(json)
+            var scale = 120;
+            var offset = [width / 2, height / 2];
+            projection = d3.geo.mercator().scale(scale).center(
+                    center)
+                .translate(offset);
 
-    g = vis.append('g');
+            // create the path
+            path = d3.geo.path().projection(projection);
 
-    d3.json("geojson/provinces.json", function(json) {
-        // create a first guess for the projection
-        center = d3.geo.centroid(json)
-        var scale = 120;
-        var offset = [width / 2, height / 2];
-        var projection = d3.geo.mercator().scale(scale).center(
-                center)
-            .translate(offset);
+            // using the path determine the bounds of the current map and use 
+            //  these to determine better values for the scale and translation
+            var bounds = path.bounds(json);
+            var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
+            var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
+            var scale = (hscale < vscale) ? hscale : vscale;
+            var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
+                height - (bounds[0][1] + bounds[1][1]) / 2
+            ];
 
-        // create the path
-        path = d3.geo.path().projection(projection);
+            // new projection
+            projection = d3.geo.mercator().center(center)
+                .scale(scale).translate(offset);
+            path = path.projection(projection);
 
-        // using the path determine the bounds of the current map and use 
-        //  these to determine better values for the scale and translation
-        var bounds = path.bounds(json);
-        var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
-        var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
-        var scale = (hscale < vscale) ? hscale : vscale;
-        var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
-            height - (bounds[0][1] + bounds[1][1]) / 2
-        ];
+            g.selectAll("path")
+                .data(json.features).enter()
+                .append('g')
+                .attr('id', function(d){ 
+                    return d.properties.nuts3; 
+                })
+                .on('click', function(d) {
+                    d3.selectAll('.municipality.show')
+                        .classed('show', false);
+                    
+                    d3.selectAll('.nuts-' + d.properties.nuts3)
+                        .attr('class', 'municipality show nuts-' + d.properties.nuts3);
 
-        // new projection
-        projection = d3.geo.mercator().center(center)
-            .scale(scale).translate(offset);
-        path = path.projection(projection);
+                    region_clicked(d); //d3.select('#' + d.properties.nuts3 + ' > path'));
+                })
+                .attr('class', 'province')
+                .append(
+                    "path")
+                .attr("d", path)
+                .style("stroke-width", "1")
+                .style("stroke", "#7c9944")
+                .attr('fill', 'rgba(255,255,255,.45)');
 
-        g.selectAll("path")
-            .data(json.features).enter()
-            .append('g')
-            .attr('id', function(d){ 
-                return d.properties.nuts3; 
-            })
-            .on('click', function(d) {
-                d3.selectAll('.municipality.show')
-                    .classed('show', false);
-                
-                d3.selectAll('.nuts-' + d.properties.nuts3)
-                    .attr('class', 'municipality show nuts-' + d.properties.nuts3);
+            load_places();    
+        });
+    }
 
-                region_clicked(d); //d3.select('#' + d.properties.nuts3 + ' > path'));
-            })
-            .attr('class', 'province')
-            .append(
-                "path")
-            .attr("d", path)
-            .style("stroke-width", "1")
-            .style("stroke", "#7c9944")
-            .attr('fill', 'rgba(255,255,255,.45)');
+    function load_municipalities() {
+        d3.json("geojson/municipalities.json", function(json) {
+            // create a first guess for the projection
+            var center = d3.geo.centroid(json)
+            var scale = 120;
+            var offset = [width / 2, height / 2];
+            var projection = d3.geo.mercator().scale(scale).center(
+                    center)
+                .translate(offset);
 
-        
+            // create the path
+            var path = d3.geo.path().projection(projection);
+
+            // using the path determine the bounds of the current map and use 
+            //  these to determine better values for the scale and translation
+            var bounds = path.bounds(json);
+            var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
+            var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
+            var scale = (hscale < vscale) ? hscale : vscale;
+            var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
+                height - (bounds[0][1] + bounds[1][1]) / 2
+            ];
+
+            // new projection
+            projection = d3.geo.mercator().center(center)
+                .scale(scale).translate(offset);
+            path = path.projection(projection);
+
+            g.selectAll("path").data(json.features).enter()
+                .append('g')
+                .attr('id', function(d){
+                    return d.properties.nut4; 
+                })
+                .attr('class', function(d) {
+                    return 'municipality nuts-' + d.properties.nuts3; 
+                })
+                .append(
+                    "path")
+                .attr("d", path)
+                .style("stroke-width", "1")
+                .style("stroke", "#7c9944")
+                .attr('fill', 'rgba(255,255,255,.45)');
+        });
+    }
+
+    function load_places() {
         d3.json("geojson/places.json", function(json) {
             json.forEach(function(place) {
                 var geo = place.geo.split(',');
@@ -113,50 +158,18 @@
                     }); 
             });
         });
-    });
 
+    }
 
-     d3.json("geojson/municipalities.json", function(json) {
-        // create a first guess for the projection
-        var center = d3.geo.centroid(json)
-        var scale = 120;
-        var offset = [width / 2, height / 2];
-        var projection = d3.geo.mercator().scale(scale).center(
-                center)
-            .translate(offset);
+    function init() {
+        var vis = d3.select("#map-container").append("svg")
+            .attr("width", width).attr("height", height).attr('viewBox', '36 0 900 600');
 
-        // create the path
-        var path = d3.geo.path().projection(projection);
+        g = vis.append('g');
 
-        // using the path determine the bounds of the current map and use 
-        //  these to determine better values for the scale and translation
-        var bounds = path.bounds(json);
-        var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
-        var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
-        var scale = (hscale < vscale) ? hscale : vscale;
-        var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
-            height - (bounds[0][1] + bounds[1][1]) / 2
-        ];
+        load_provinces();
+        load_municipalities();
+    }
 
-        // new projection
-        projection = d3.geo.mercator().center(center)
-            .scale(scale).translate(offset);
-        path = path.projection(projection);
-
-        g.selectAll("path").data(json.features).enter()
-            .append('g')
-            .attr('id', function(d){
-                return d.properties.nut4; 
-            })
-            .attr('class', function(d) {
-                return 'municipality nuts-' + d.properties.nuts3; 
-            })
-            .append(
-                "path")
-            .attr("d", path)
-            .style("stroke-width", "1")
-            .style("stroke", "#7c9944")
-            .attr('fill', 'rgba(255,255,255,.45)');
-    });
-
+    init();
 } ())
