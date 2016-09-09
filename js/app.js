@@ -5,6 +5,7 @@
     var path = null;
     var g = null;
     var projection = null;
+    var selected_province = null;
 
     function region_clicked(d) {
         var x, y, k;
@@ -12,10 +13,9 @@
             var centroid = path.centroid(d);
             x = centroid[0];
             y = centroid[1];
-            k = 3.5;
+            k = 2.5;
             centered = d;
-
-            zoom_in();
+            zoom_in(d.properties.nuts3);
         } else {
             x = width / 2;
             y = height / 2;
@@ -31,9 +31,14 @@
             .style("stroke-width", 1.5 / k + "px");
     } 
 
-    function zoom_in() {
+    function zoom_in(province) {
+        if(selected_province) {
+            d3.selectAll('.village.' + selected_province).classed('visible', false);
+        }
+
+        selected_province = province;
         d3.selectAll('.town').classed('visible', false);
-        d3.selectAll('.village').classed('visible', true);
+        d3.selectAll('.village.' + province).classed('visible', true);
     }
 
     function zoom_out() {
@@ -93,6 +98,7 @@
                 .attr('fill', 'rgba(255,255,255,.45)');
 
             load_places();    
+            load_stats();
         });
     }
 
@@ -142,12 +148,23 @@
     }
 
     function load_places() {
-        d3.json("geojson/places.json?1", function(json) {
+        d3.json("geojson/places.json?4", function(json) {
             json.forEach(function(place) {
                 var geo = place.geo.split(',');
                 var placeGroup = g.append('g');
-                console.log(place);
-                placeGroup.attr('id', place.municipality_code);    
+                
+                placeGroup
+                    .attr('id', place.municipality_code)
+                    .attr("class", function(d) {
+                        if(place.village === 0) {
+                            return 'town visible';
+                        }
+
+                        if(place.village === 1) {
+                            return 'village ' + place.province;
+                        }
+                    });
+                
                 placeGroup
                     .append('circle')
                     .attr("r", function() {
@@ -159,21 +176,22 @@
                             return 3;
                         }
                     })
-                    .attr("transform", function() {
-                        return "translate(" + projection([parseFloat(geo[0]), parseFloat(geo[1])]) + ")";
-                    })
-                    .attr("class", function(d) {
+                    .attr('fill', '#3d322a')
+                    .attr('opacity', function() { 
                         if(place.village === 0) {
-                            return 'town visible';
+                            return 0.8;
                         }
 
-                        if(place.village === 1) {
-                            return 'village';
-                        }
-                    }); 
+                        return 0.8;
+                    })
+                    .attr("transform", function() {
+                        return "translate(" + projection([parseFloat(geo[0]), parseFloat(geo[1])]) + ")";
+                    });
+
                 placeGroup
                     .append('text')
                     .text(place.name)
+                    .attr('fill', '#3d322a')
                     .attr('font-size', function() {
                         if(place.village === 0) {
                             return 16; 
@@ -202,18 +220,14 @@
                         var x = parseFloat(geo[0]);
                         var y = parseFloat(geo[1]);
                         return "translate(" + projection([x,y]) + ")";
-                    })
-                    .attr("class", function(d) {
-                        if(place.village === 0) {
-                            return 'town visible';
-                        }
-
-                        if(place.village === 1) {
-                            return 'village';
-                        }
-                    }); 
+                    });
             });
         });
+
+    }
+
+    function load_stats() {
+       var shuBox = d3.select('#SHU').getClientBoundingBox(); 
 
     }
 

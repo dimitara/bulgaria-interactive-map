@@ -3,6 +3,7 @@
         "name": "Шумен",
         "village": 0,
         "ekatte": "83510",
+        "province_code": "SHU",
         "municipality_code": "SHU30",
         "geo": "26.936129,43.27124",
         "count": 323
@@ -11,6 +12,7 @@
         "name": "Варна",
         "village": 0,
         "ekatte": "10135",
+        "province_code": "VAR",
         "municipality_code": "VAR06",
         "geo": "27.910543,43.204665",
         "count": 576
@@ -20,6 +22,7 @@
         "name": "Бургас",
         "village": 0,
         "ekatte": "10135",
+        "province_code": "BGS",
         "municipality_code": "VAR06",
         "geo": "27.462636,42.504793",
         "count": 228
@@ -29,6 +32,7 @@
         "name": "Старо Оряхово",
         "village": 1,
         "ekatte": "10135",
+        "province": "VAR",
         "municipality_code": "VAR06",
         "geo": "27.794544,42.990103",
         "count": 275
@@ -38,6 +42,7 @@
         "name": "Рудник",
         "village": 1,
         "ekatte": "10135",
+        "province": "VAR",
         "municipality_code": "VAR06",
         "geo": "27.772021,42.95053",
         "count": 100
@@ -47,6 +52,7 @@
         "name": "Гроздьово",
         "village": 1,
         "ekatte": "10135",
+        "province": "VAR",
         "municipality_code": "VAR06",
         "geo": "27.5333,43.0167",
         "count": 80
@@ -55,6 +61,7 @@
         "name": "Господиново",
         "village": 1,
         "ekatte": "10135",
+        "province": "VAR",
         "municipality_code": "VAR06",
         "geo": "27.769402,42.897643",
         "count": 121
@@ -63,6 +70,7 @@
         "name": "Вършило",
         "village": 1,
         "ekatte": "10135",
+        "province": "BGS",
         "municipality_code": "VAR06",
         "geo": "27.378602,42.259617",
         "count": 162 
@@ -71,6 +79,7 @@
         "name": "Средец",
         "village": 1,
         "ekatte": "10135",
+        "province": "BGS",
         "municipality_code": "VAR06",
         "geo": "27.100306,42.111431",
         "count": 66
@@ -79,6 +88,7 @@
         "name": "Златар",
         "village": 1,
         "ekatte": "10135",
+        "province": "SHU",
         "municipality_code": "VAR06",
         "geo": "26.95332,43.109093",
         "count": 20
@@ -87,6 +97,7 @@
         "name": "Веселиново",
         "village": 1,
         "ekatte": "10135",
+        "province": "SHU",
         "municipality_code": "SHU25",
         "geo": "27.029675,42.983068",
         "count": 178
@@ -95,6 +106,7 @@
         "name": "Бял бряг",
         "village": 1,
         "ekatte": "10135",
+        "province": "SHU",
         "municipality_code": "SHU25",
         "geo": "27.105718,43.05604",
         "count": 125 
