@@ -12,8 +12,10 @@
             var centroid = path.centroid(d);
             x = centroid[0];
             y = centroid[1];
-            k = 2.5;
+            k = 3.5;
             centered = d;
+
+            zoom_in();
         } else {
             x = width / 2;
             y = height / 2;
@@ -28,6 +30,11 @@
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
             .style("stroke-width", 1.5 / k + "px");
     } 
+
+    function zoom_in() {
+        d3.selectAll('.town').classed('visible', false);
+        d3.selectAll('.village').classed('visible', true);
+    }
 
     function zoom_out() {
         d3.selectAll('.municipality.show')
@@ -143,13 +150,21 @@
                 placeGroup.attr('id', place.municipality_code);    
                 placeGroup
                     .append('circle')
-                    .attr("r",5)
+                    .attr("r", function() {
+                        if(place.village === 0) {
+                            return 5;
+                        }
+
+                        if(place.village === 1) {
+                            return 3;
+                        }
+                    })
                     .attr("transform", function() {
                         return "translate(" + projection([parseFloat(geo[0]), parseFloat(geo[1])]) + ")";
                     })
                     .attr("class", function(d) {
                         if(place.village === 0) {
-                            return 'town';
+                            return 'town visible';
                         }
 
                         if(place.village === 1) {
@@ -159,8 +174,30 @@
                 placeGroup
                     .append('text')
                     .text(place.name)
-                    .attr('x', function() {return -this.getBBox().width/2; })
-                    .attr('y', function() {return -this.getBBox().height/2; })
+                    .attr('font-size', function() {
+                        if(place.village === 0) {
+                            return 16; 
+                        }
+                        
+                        return 8;
+                    })
+                    .attr('x', function() {
+                        if(place.name === 'Рудник' || place.name === 'Господиново') {
+                            return 5;
+                        }
+                        return -this.getBBox().width/2; 
+                    })
+                    .attr('y', function() {
+                        if(place.name === 'Рудник' || place.name === 'Господиново') {
+                            return 3;
+                        }
+                        
+                        if(place.name === 'Старо Оряхово') {
+                            return -this.getBBox().height/2 + 2;
+                        }
+
+                        return -this.getBBox().height/2; 
+                    })
                     .attr("transform", function() {
                         var x = parseFloat(geo[0]);
                         var y = parseFloat(geo[1]);
@@ -168,7 +205,7 @@
                     })
                     .attr("class", function(d) {
                         if(place.village === 0) {
-                            return 'town';
+                            return 'town visible';
                         }
 
                         if(place.village === 1) {
