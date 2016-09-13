@@ -45,6 +45,8 @@
         g.transition()
             .duration(750)
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")");
+
+        document.getElementById('zoom-out').style.display = 'block';
     }
 
     function zoom_out() {
@@ -57,6 +59,8 @@
         g.transition()
             .duration(750)
             .attr("transform", "translate(0,0)");
+        
+        document.getElementById('zoom-out').style.display = 'none';
     }
 
     function load_provinces() {
@@ -152,12 +156,7 @@
             projection = d3.geo.mercator().center(center)
                 .scale(scale).translate(offset);
             path = path.projection(projection);
-            json.features.forEach(function(f) {
-                if(f.properties.nuts4 === 'SHU23') {
-                    console.log('whhaaat', f);
-                }
-            });
-
+            
             g.selectAll("text").data(json.features).enter()
                 .append('g')
                 .attr('id', function(d){
@@ -293,25 +292,36 @@
 
         gShu.append('text')
             .text('Шумен')
-            .attr('fill', '#fff')
+            .attr('fill', '#3d322a')
+            .attr('font-size', '16')
             .attr('x', function() {
                 return -this.getBBox().width/2; 
             })
             .attr('y', function() {
-                return -this.getBBox().height/2; 
+                return -this.getBBox().height/2 - 10; 
             });
         
         gShu.append('text')
-            .text('323')
+            .text('323 броя')
             .attr('fill', '#fff')
-            .attr('font-size', 24)
+            .attr('font-size', 18)
             .attr('x', function() {
-                return -this.getBBox().width/2; 
+                return -this.getBBox().width/2 - 5; 
             })
             .attr('y', function() {
-                return -this.getBBox().height/2 + 35; 
+                return -this.getBBox().height/2 + 18; 
             });
-
+        
+        gShu.append('text')
+            .text('5 стада')
+            .attr('fill', '#fff')
+            .attr('font-size', 18)
+            .attr('x', function() {
+                return -this.getBBox().width/2 - 10; 
+            })
+            .attr('y', function() {
+                return -this.getBBox().height/2 + 40 
+            });
         gVar.append('circle')
             .attr('x', 0)
             .attr('y', 0)
@@ -321,23 +331,35 @@
         
         gVar.append('text')
             .text('Варна')
-            .attr('fill', '#fff')
+            .attr('fill', '#3d322a')
+            .attr('font-size', 16)
             .attr('x', function() {
                 return -this.getBBox().width/2; 
             })
             .attr('y', function() {
-                return -this.getBBox().height/2; 
+                return -this.getBBox().height/2 - 10; 
             });
         
         gVar.append('text')
-            .text('576')
+            .text('576 броя')
             .attr('fill', '#fff')
-            .attr('font-size', 24)
+            .attr('font-size', 18)
             .attr('x', function() {
-                return -this.getBBox().width/2; 
+                return -this.getBBox().width/2 - 5; 
             })
             .attr('y', function() {
-                return -this.getBBox().height/2 + 35; 
+                return -this.getBBox().height/2 + 18; 
+            });
+        
+        gVar.append('text')
+            .text('4 стада')
+            .attr('fill', '#fff')
+            .attr('font-size', 18)
+            .attr('x', function() {
+                return -this.getBBox().width/2 - 12; 
+            })
+            .attr('y', function() {
+                return -this.getBBox().height/2 + 40; 
             });
 
         gBgs.append('circle')
@@ -349,25 +371,36 @@
         
         gBgs.append('text')
             .text('Бургас')
-            .attr('fill', '#fff')
+            .attr('fill', '#3d322a')
+            .attr('font-size', 16)
             .attr('x', function() {
                 return -this.getBBox().width/2; 
             })
             .attr('y', function() {
-                return -this.getBBox().height/2; 
+                return -this.getBBox().height/2 - 10; 
             });
         
         gBgs.append('text')
-            .text('228')
+            .text('228 броя')
             .attr('fill', '#fff')
-            .attr('font-size', 24)
+            .attr('font-size', 18)
             .attr('x', function() {
-                return -this.getBBox().width/2; 
+                return -this.getBBox().width/2 - 5; 
             })
             .attr('y', function() {
-                return -this.getBBox().height/2 + 35; 
+                return -this.getBBox().height/2 + 18; 
             });
-
+        
+        gBgs.append('text')
+            .text('2 стада')
+            .attr('fill', '#fff')
+            .attr('font-size', 18)
+            .attr('x', function() {
+                return -this.getBBox().width/2 - 10; 
+            })
+            .attr('y', function() {
+                return -this.getBBox().height/2 + 40; 
+            });
     }
 
     function bind_notes() {
@@ -394,6 +427,10 @@
             mark_municipalities();
         }, 1000);
     }
+
+    document.getElementById('zoom-out').addEventListener('click', function() {
+        zoom_out();
+    });
 
     init();
 } ())
