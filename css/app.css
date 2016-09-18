@@ -1,0 +1,24 @@
+.village, .town {
+    visibility: hidden;
+    opacity:0;
+    transition: opacity .3s ease-out;
+}
+
+.village.visible, .town.visible {
+    visibility: visible;
+    opacity:1;
+}
+
+.stats {
+    opacity:1;
+    transition: opacity .5s ease-out;
+    pointer-events:none;
+}
+
+.hidden {
+    opacity:0;
+}
+
+text {
+    font-family: "Comfortaa"
+}
